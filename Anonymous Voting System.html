@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Voting System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        button.secondary:hover {
+            background: #d0d0d0;
+        }
+
+        button.danger {
+            background: #ff6b6b;
+        }
+
+        button.danger:hover {
+            background: #ee5a52;
+        }
+
+        .items-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .item-chip {
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            padding: 12px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .item-chip:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+
+        .item-chip button {
+            background: #ff6b6b;
+            padding: 4px 8px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .voting-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .voter-info {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .choices-grid {
+            display: grid;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .choice-card {
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .choice-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .choice-card.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            font-weight: 600;
+        }
+
+        .choice-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
+
+        .voting-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            transition: width 0.3s;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .results-table th {
+            background: #f9f9f9;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .results-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .round-indicator {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .tiebreak-notice {
+            background: #fff4e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .error-message {
+            background: #ffe0e0;
+            border-left: 4px solid #ff6b6b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #8b0000;
+        }
+
+        .success-message {
+            background: #e0f7e0;
+            border-left: 4px solid #2d7a2d;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #2d7a2d;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .voter-button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            .items-list {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🗳️ Anonymous Voting System</h1>
+            <p class="subtitle">Pass around to each member - up to 6 voters per round</p>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="switchTab('setup')">Setup</button>
+                <button class="tab-button" onclick="switchTab('voting')">Voting</button>
+                <button class="tab-button" onclick="switchTab('results')">Results</button>
+            </div>
+
+            <!-- SETUP TAB -->
+            <div id="setup" class="section active">
+                <h2>Step 1: Create Voting Session</h2>
+                
+                <div class="input-group">
+                    <label>Enter items/candidates (one per line):</label>
+                    <textarea id="itemsInput" placeholder="Option A&#10;Option B&#10;Option C&#10;..."></textarea>
+                </div>
+
+                <button onclick="parseItems()">Parse Items</button>
+
+                <div id="itemsDisplay"></div>
+
+                <h2>Manage Items</h2>
+                <button onclick="removeBlankItems()" style="background: #ff9800; margin-bottom: 15px;">🧹 Remove Blank Options</button>
+
+                <h2>Step 2: Create Voting Session</h2>
+                <div class="info-box">
+                    💡 Pass the device between members to vote. Each member votes anonymously up to 6 times per round. After everyone votes, view results and choose items for next round.
+                </div>
+
+                <button onclick="createSession()">Create Voting Session</button>
+
+                <h2>Current Session Status</h2>
+                <div id="sessionStatus"></div>
+            </div>
+
+            <!-- VOTING TAB -->
+            <div id="voting" class="section">
+                <h2>Anonymous Voting</h2>
+                <div id="votingInterface"></div>
+            </div>
+
+            <!-- RESULTS TAB -->
+            <div id="results" class="section">
+                <h2>Voting Results & Elimination</h2>
+                <div id="resultsInterface"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GLOBAL STATE =====
+        const state = {
+            sessionId: null,
+            items: [],
+            choicesPerMember: 0,
+            votes: {}, // { voterId: [chosenItems] }
+            currentRound: 1,
+            tiebreakRound: 0,
+            tiebreakChoices: null,
+            finalWinner: null,
+            voterId: null,
+            voterCount: 0
+        };
+
+        // ===== UTILITY FUNCTIONS =====
+        function generateSessionId() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+
+        function generateVoterId() {
+            return 'voter_' + Math.random().toString(36).substring(2, 10);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'voting') {
+                updateVotingInterface();
+            } else if (tabName === 'results') {
+                updateResultsInterface();
+            }
+        }
+
+        // ===== SETUP PHASE =====
+        function parseItems() {
+            const input = document.getElementById('itemsInput').value;
+            const items = input.split('\n')
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+
+            if (items.length < 2) {
+                alert('Please enter at least 2 items');
+                return;
+            }
+
+            state.items = items;
+            displayParsedItems();
+        }
+
+        function displayParsedItems() {
+            const container = document.getElementById('itemsDisplay');
+            if (state.items.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const itemsHTML = `
+                <div style="margin-top: 20px;">
+                    <h3 style="color: #333; margin-bottom: 10px;">Parsed Items (${state.items.length} total):</h3>
+                    <div class="items-list">
+                        ${state.items.map((item, idx) => `
+                            <div class="item-chip">
+                                <span>${item}</span>
+                                <button onclick="removeItem(${idx})" style="margin: 0;">×</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            container.innerHTML = itemsHTML;
+        }
+
+        function removeItem(index) {
+            state.items.splice(index, 1);
+            displayParsedItems();
+        }
+
+        function removeBlankItems() {
+            const originalCount = state.items.length;
+            state.items = state.items.filter(item => item.trim().length > 0);
+            const removedCount = originalCount - state.items.length;
+            
+            if (removedCount === 0) {
+                alert('✓ No blank options to remove!');
+            } else {
+                alert(`✓ Removed ${removedCount} blank option(s)!`);
+            }
+            displayParsedItems();
+        }
+
+        function createSession() {
+            if (state.items.length < 2) {
+                alert('Please parse items first');
+                return;
+            }
+
+            const totalChoices = state.items.length;
+            state.choicesPerMember = Math.ceil(totalChoices * 0.4);
+            state.sessionId = generateSessionId();
+            state.currentRound = 1;
+            state.votes = {};
+            state.finalWinner = null;
+            state.tiebreakRound = 0;
+            state.voterCount = 0;
+
+            updateSessionStatus();
+            switchTab('voting');
+            prepareNextVoter();
+        }
+
+        function updateSessionStatus() {
+            const statusDiv = document.getElementById('sessionStatus');
+            if (!state.sessionId) {
+                statusDiv.innerHTML = '<p style="color: #999;">No active session</p>';
+                return;
+            }
+
+            const votedCount = Object.keys(state.votes).length;
+            statusDiv.innerHTML = `
+                <div class="voting-info">
+                    <p><strong>Session ID:</strong> ${state.sessionId}</p>
+                    <p><strong>Total Items:</strong> ${state.items.length}</p>
+                    <p><strong>Choices per Member:</strong> ${state.choicesPerMember}</p>
+                    <p><strong>Members Voted:</strong> ${votedCount} / 6</p>
+                    <p><strong>Current Round:</strong> ${state.currentRound}</p>
+                    <p style="margin-top: 10px; font-size: 13px; color: #666;">
+                        Round Items: ${state.items.join(', ')}
+                    </p>
+                </div>
+            `;
+        }
+
+        // ===== VOTING PHASE =====
+        function prepareNextVoter() {
+            if (state.voterCount >= 6) {
+                alert('Maximum 6 voters reached. Go to Results tab to view voting results.');
+                return;
+            }
+
+            state.voterId = generateVoterId();
+            state.votes[state.voterId] = [];
+            state.voterCount++;
+
+            updateVotingInterface();
+        }
+
+        function updateVotingInterface() {
+            if (!state.sessionId) {
+                document.getElementById('votingInterface').innerHTML = `
+                    <div class="error-message">
+                        ❌ No active voting session. Please create one first.
+                    </div>
+                `;
+                return;
+            }
+
+            const votingDiv = document.getElementById('votingInterface');
+            const userVotes = state.votes[state.voterId] || [];
+            const remaining = state.choicesPerMember - userVotes.length;
+
+            if (remaining === 0) {
+                votingDiv.innerHTML = `
+                    <div class="voting-container">
+                        <div class="voting-info">
+                            <p><strong>Round ${state.currentRound}:</strong> Select ${state.choicesPerMember} items</p>
+                            <p>All votes selected! ✓</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%"></div>
+                            </div>
+                        </div>
+
+                        <p style="margin-bottom: 15px; color: #666; font-size: 14px;">
+                            Click on items to select (each item can only be chosen once):
+                        </p>
+
+                        <div class="choices-grid">
+                            ${state.items.map(item => {
+                                const isSelected = userVotes.includes(item);
+                                return `
+                                    <div class="choice-card ${isSelected ? 'selected' : ''}"
+                                         onclick="toggleVote('${item.replace(/'/g, "\\'")}')">
+                                        ${item}
+                                        ${isSelected ? ' ✓' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        <button onclick="submitVotes()" style="margin-top: 20px; width: 100%; padding: 15px;">
+                            Review & Confirm Votes
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const votingHTML = `
+                <div class="voting-container">
+                    <div class="voter-info">
+                        🔒 Voter ${state.voterCount} of 6 (Voting Anonymously)
+                    </div>
+
+                    <div class="voting-info">
+                        <p><strong>Round ${state.currentRound}:</strong> Select ${state.choicesPerMember} items</p>
+                        <p>Votes remaining: <strong>${remaining}</strong></p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${(userVotes.length / state.choicesPerMember) * 100}%"></div>
+                        </div>
+                    </div>
+
+                    <p style="margin-bottom: 15px; color: #666; font-size: 14px;">
+                        Click on items to select (each item can only be chosen once):
+                    </p>
+
+                    <div class="choices-grid">
+                        ${state.items.map(item => {
+                            const isSelected = userVotes.includes(item);
+                            const isDisabled = !isSelected && remaining === 0;
+                            return `
+                                <div class="choice-card ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
+                                     onclick="toggleVote('${item.replace(/'/g, "\\'")}')">
+                                    ${item}
+                                    ${isSelected ? ' ✓' : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    ${remaining === 0 ? `
+                        <button onclick="submitVotes()" style="margin-top: 20px; width: 100%; padding: 15px;">
+                            Submit Your Votes
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+
+            votingDiv.innerHTML = votingHTML;
+        }
+
+        function toggleVote(item) {
+            const userVotes = state.votes[state.voterId] || [];
+            const idx = userVotes.indexOf(item);
+
+            if (idx > -1) {
+                userVotes.splice(idx, 1);
+            } else if (userVotes.length < state.choicesPerMember) {
+                userVotes.push(item);
+            }
+
+            state.votes[state.voterId] = userVotes;
+            updateVotingInterface();
+        }
+
+        function submitVotes() {
+            if (state.votes[state.voterId].length !== state.choicesPerMember) {
+                alert('Please select exactly ' + state.choicesPerMember + ' items');
+                return;
+            }
+            showConfirmationScreen();
+        }
+
+        function showConfirmationScreen() {
+            const votingDiv = document.getElementById('votingInterface');
+            const userVotes = state.votes[state.voterId] || [];
+
+            const confirmationHTML = `
+                <div class="voting-container">
+                    <div class="voter-info">
+                        ✓ Review Your Choices
+                    </div>
+
+                    <div class="success-message">
+                        <strong>You have selected the following ${userVotes.length} items:</strong>
+                    </div>
+
+                    <div style="background: #f0f0f0; padding: 20px; border-radius: 6px; margin: 20px 0;">
+                        ${userVotes.map((item, idx) => `
+                            <div style="padding: 10px; margin: 8px 0; background: white; border-radius: 4px; border-left: 4px solid #667eea;">
+                                <strong>${idx + 1}.</strong> ${item}
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="info-box">
+                        💡 Please review your choices. If anything is wrong, click "Go Back to Change" to edit your votes.
+                    </div>
+
+                    <div class="voter-button-group">
+                        <button onclick="goBackToVoting()" style="background: #ff9800; flex: 1;">
+                            ← Go Back to Change
+                        </button>
+                        <button onclick="confirmAndLockVotes()" style="background: #2d7a2d; flex: 1;">
+                            ✓ Confirm Choices
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            votingDiv.innerHTML = confirmationHTML;
+        }
+
+        function goBackToVoting() {
+            updateVotingInterface();
+        }
+
+        function confirmAndLockVotes() {
+            const votingDiv = document.getElementById('votingInterface');
+            votingDiv.innerHTML = `
+                <div class="voting-container">
+                    <div class="success-message">
+                        ✓ You have submitted all your votes!
+                    </div>
+                    <div class="voter-button-group">
+                        ${state.voterCount < 6 ? `
+                            <button onclick="prepareNextVoter()" style="background: #2d7a2d; flex: 1;">
+                                👤 Next Voter (${state.voterCount}/6)
+                            </button>
+                        ` : ''}
+                        <button onclick="switchTab('results')" style="background: #667eea; flex: 1;">
+                            📊 View Results
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== RESULTS & ELIMINATION PHASE =====
+        function updateResultsInterface() {
+            const resultsDiv = document.getElementById('resultsInterface');
+
+            if (!state.sessionId || Object.keys(state.votes).length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="error-message">
+                        ❌ No votes recorded yet.
+                    </div>
+                `;
+                return;
+            }
+
+            const voterCount = Object.keys(state.votes).length;
+
+            // Calculate vote counts
+            const voteCounts = {};
+            state.items.forEach(item => voteCounts[item] = 0);
+
+            Object.values(state.votes).forEach(votes => {
+                votes.forEach(item => {
+                    if (voteCounts[item] !== undefined) {
+                        voteCounts[item]++;
+                    }
+                });
+            });
+
+            // Sort by votes
+            const sorted = Object.entries(voteCounts)
+                .sort((a, b) => b[1] - a[1]);
+
+            // Check for winner
+            if (state.items.length === 2) {
+                const [first, second] = sorted;
+                if (first[1] === second[1]) {
+                    if (state.tiebreakRound === 0) {
+                        state.tiebreakRound = 1;
+                        state.tiebreakChoices = [first[0], second[0]];
+                        state.items = [first[0], second[0]];
+                        state.votes = {};
+                        state.voterCount = 0;
+                        state.choicesPerMember = 1;
+
+                        resultsDiv.innerHTML = `
+                            <div class="tiebreak-notice">
+                                ⚖️ <strong>Tiebreak Round 1:</strong> Both choices received equal votes! Members must vote again between the two tied options.
+                            </div>
+                            <button onclick="prepareNextVoter(); switchTab('voting')">Start Tiebreak Vote</button>
+                        `;
+                        return;
+                    } else if (state.tiebreakRound === 1) {
+                        state.tiebreakRound = 2;
+                        state.items = state.tiebreakChoices;
+                        state.votes = {};
+                        state.voterCount = 0;
+                        state.choicesPerMember = 1;
+
+                        resultsDiv.innerHTML = `
+                            <div class="tiebreak-notice">
+                                ⚖️ <strong>Tiebreak Round 2:</strong> Still tied! This is the final tiebreak. If tied again, winner will be random.
+                            </div>
+                            <button onclick="prepareNextVoter(); switchTab('voting')">Start Final Tiebreak Vote</button>
+                        `;
+                        return;
+                    } else {
+                        const winner = Math.random() < 0.5 ? first[0] : second[0];
+                        state.finalWinner = winner;
+
+                        resultsDiv.innerHTML = `
+                            <div class="success-message">
+                                🎉 <strong>Final Winner (Selected Randomly):</strong> ${winner}
+                            </div>
+                            <button onclick="resetSession()">Reset for New Vote</button>
+                        `;
+                        return;
+                    }
+                } else {
+                    state.finalWinner = first[0];
+                    resultsDiv.innerHTML = `
+                        <div class="success-message">
+                            🎉 <strong>Final Winner:</strong> ${first[0]} (${first[1]} votes)
+                        </div>
+                        <button onclick="resetSession()">Reset for New Vote</button>
+                    `;
+                    return;
+                }
+            }
+
+            // Display current round results
+            resultsDiv.innerHTML = `
+                <div class="round-indicator">
+                    Round ${state.currentRound}: ${state.items.length} choices remaining
+                </div>
+
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Choice</th>
+                            <th>Votes</th>
+                            <th>Percentage</th>
+                            <th>Select</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sorted.map(([item, count]) => {
+                            const percentage = voterCount > 0 ? ((count / voterCount) * 100).toFixed(1) : 0;
+                            return `
+                                <tr>
+                                    <td>${item}</td>
+                                    <td>${count}</td>
+                                    <td>${percentage}%</td>
+                                    <td>
+                                        <input type="checkbox" onchange="toggleSelection('${item.replace(/'/g, "\\'")}')">
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+
+                <div class="info-box" style="margin-top: 20px;">
+                    Select items to keep for the next round. The remaining items will advance.
+                </div>
+
+                <button onclick="proceedToNextRound()" style="margin-top: 20px; width: 100%; padding: 15px;">
+                    Proceed to Next Round
+                </button>
+            `;
+        }
+
+        let selectedForNextRound = [];
+
+        function toggleSelection(item) {
+            const idx = selectedForNextRound.indexOf(item);
+            if (idx > -1) {
+                selectedForNextRound.splice(idx, 1);
+            } else {
+                selectedForNextRound.push(item);
+            }
+        }
+
+        function proceedToNextRound() {
+            if (selectedForNextRound.length === 0) {
+                alert('Please select at least one item for the next round');
+                return;
+            }
+
+            state.items = selectedForNextRound;
+            selectedForNextRound = [];
+            state.currentRound++;
+            state.votes = {};
+            state.voterCount = 0;
+            state.choicesPerMember = Math.ceil(state.items.length * 0.4);
+
+            switchTab('voting');
+            prepareNextVoter();
+        }
+
+        function resetSession() {
+            state.sessionId = null;
+            state.items = [];
+            state.choicesPerMember = 0;
+            state.votes = {};
+            state.currentRound = 1;
+            state.finalWinner = null;
+            state.tiebreakRound = 0;
+            state.voterCount = 0;
+            document.getElementById('itemsInput').value = '';
+            document.getElementById('itemsDisplay').innerHTML = '';
+            document.getElementById('sessionStatus').innerHTML = '<p style="color: #999;">No active session</p>';
+            switchTab('setup');
+        }
+
+        // ===== INITIALIZATION =====
+        updateSessionStatus();
+    </script>
+</body>
+</html>
